@@ -5,7 +5,8 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" }
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+    { "key": "adminApiKey", "value": "replace-with-your-admin-api-key", "type": "string" }
   ],
   "item": [
     {
@@ -48,7 +49,10 @@
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/events/simulate",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"amount\": 4999,\n  \"currency\": \"usd\",\n  \"customerEmail\": \"demo@example.com\",\n  \"customerPhone\": \"+1234567890\"\n}"
@@ -59,7 +63,8 @@
           "name": "Delete Event",
           "request": {
             "method": "DELETE",
-            "url": "{{baseUrl}}/events/:id"
+            "url": "{{baseUrl}}/events/:id",
+            "header": [{ "key": "x-api-key", "value": "{{adminApiKey}}" }]
           }
         }
       ]
@@ -72,7 +77,10 @@
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/notify/sms",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"to\": \"+1234567890\",\n  \"message\": \"Test SMS from SaaS Integration Hub\"\n}"
@@ -84,7 +92,10 @@
           "request": {
             "method": "POST",
             "url": "{{baseUrl}}/notify/slack",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"amount\": 4999,\n  \"currency\": \"usd\",\n  \"customerEmail\": \"demo@example.com\",\n  \"status\": \"processed\"\n}"

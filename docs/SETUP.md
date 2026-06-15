@@ -39,6 +39,14 @@ cp .env.example server/.env
 ```
 
 Open `server/.env` and fill in each value (see sections below for how to find each one).
+Create `client/.env`, then set `ADMIN_API_KEY` in `server/.env` to a long random string and put the same value in `client/.env` as `VITE_ADMIN_API_KEY` so the local Simulate page can call protected demo endpoints.
+
+For local development, keep:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000
+VITE_ADMIN_API_KEY=<same-value-as-ADMIN_API_KEY>
+```
 
 ---
 
@@ -83,11 +91,14 @@ MONGODB_URI=mongodb+srv://myuser:mypassword@cluster0.xxxxx.mongodb.net/saas-hub
 3. Under **Phone Numbers → Manage → Active numbers**, copy your trial number
 4. Set:
    ```
+   SMS_MODE=mock
    TWILIO_ACCOUNT_SID=AC...
    TWILIO_AUTH_TOKEN=...
    TWILIO_PHONE_NUMBER=+1...
    TEST_RECIPIENT_PHONE=+1<your-verified-number>
    ```
+
+Keep `SMS_MODE=mock` if you only want console logging during demos. Set `SMS_MODE=live` to send real Twilio messages; live mode requires all Twilio values above.
 
 > **Note:** Twilio trial accounts can only send SMS to verified numbers. Verify yours at [console.twilio.com/verify](https://console.twilio.com/verify).
 
@@ -153,3 +164,4 @@ Import `postman/SaaS-Integration-Hub.json` and fire the **Simulate Event** reque
 | SMS not sending | Unverified recipient number | Verify number in Twilio console |
 | Slack message not posting | Wrong webhook URL | Re-copy from Slack app settings |
 | `Cannot GET /events` | Server not running | Run `npm run dev:server` |
+| `Invalid or missing API key` | `ADMIN_API_KEY` and `VITE_ADMIN_API_KEY` do not match | Copy the same demo key into `server/.env` and `client/.env` |

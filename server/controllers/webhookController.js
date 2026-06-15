@@ -29,7 +29,8 @@ async function handleStripeWebhook(req, res) {
     throw err;
   }
 
-  const updates = { status: 'processed' };
+  const updates = { status: 'pending' };
+  const errors = [];
 
   // Send SMS if we have a phone number
   const phone = data.customerPhone || process.env.TEST_RECIPIENT_PHONE;
@@ -43,6 +44,7 @@ async function handleStripeWebhook(req, res) {
       updates.smsSent = true;
     } catch (err) {
       console.error('Twilio error:', err.message);
+      errors.push(`Twilio: ${err.message}`);
     }
   }
 
@@ -52,7 +54,11 @@ async function handleStripeWebhook(req, res) {
     updates.slackAlerted = true;
   } catch (err) {
     console.error('Slack error:', err.message);
+    errors.push(`Slack: ${err.message}`);
   }
+
+  updates.status = updates.slackAlerted ? 'processed' : 'failed';
+  if (errors.length) updates.errorMessage = errors.join('; ');
 
   await Event.findByIdAndUpdate(event._id, updates);
 
