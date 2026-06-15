@@ -1,0 +1,97 @@
+{
+  "info": {
+    "name": "SaaS Integration Hub",
+    "description": "API collection for the SaaS Integration Hub — Stripe webhooks, Twilio SMS, Slack alerts, and event log.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/health",
+        "description": "Check server health."
+      }
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/events?limit=20&page=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"],
+              "query": [
+                { "key": "limit", "value": "20" },
+                { "key": "page", "value": "1" },
+                { "key": "type", "value": "", "disabled": true },
+                { "key": "status", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Event by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/events/:id"
+          }
+        },
+        {
+          "name": "Simulate Event",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/events/simulate",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"amount\": 4999,\n  \"currency\": \"usd\",\n  \"customerEmail\": \"demo@example.com\",\n  \"customerPhone\": \"+1234567890\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/events/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Send SMS",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/notify/sms",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"+1234567890\",\n  \"message\": \"Test SMS from SaaS Integration Hub\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Send Slack Alert",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/notify/slack",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"amount\": 4999,\n  \"currency\": \"usd\",\n  \"customerEmail\": \"demo@example.com\",\n  \"status\": \"processed\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
