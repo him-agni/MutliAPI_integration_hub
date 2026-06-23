@@ -17,7 +17,7 @@ Every incoming webhook is verified in `validateStripeSignature.js`:
 2. The header contains a timestamp and an HMAC-SHA256 signature
 3. `stripe.webhooks.constructEvent()` recomputes the signature using your `STRIPE_WEBHOOK_SECRET` and rejects mismatches
 
-**Why this matters in interviews:** Without signature verification, any attacker can POST fake payment events to your endpoint and trigger SMS/Slack notifications or pollute your event log.
+**Why this matters in interviews:** Without signature verification, any attacker can POST fake payment events to your endpoint and trigger email/Slack notifications or pollute your event log.
 
 ## Idempotency
 

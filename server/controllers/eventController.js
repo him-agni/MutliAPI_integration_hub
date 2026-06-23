@@ -1,7 +1,6 @@
 const Event = require('../models/Event');
 const mongoose = require('mongoose');
-const { sendSMS } = require('../services/twilioService');
-const { postSlackAlert } = require('../services/slackService');
+const { processEvent } = require('../services/eventProcessor');
 
 const EVENT_TYPES = new Set([
   'payment_intent.succeeded',
@@ -9,9 +8,16 @@ const EVENT_TYPES = new Set([
   'charge.succeeded',
   'charge.failed',
   'checkout.session.completed',
+  'shopify.inventory.low_stock',
+  'delivery.pre_transit',
+  'delivery.transit',
+  'delivery.out_for_delivery',
+  'delivery.delivered',
+  'delivery.failure',
 ]);
 
 const STATUSES = new Set(['pending', 'processed', 'failed']);
+const SOURCES = new Set(['stripe', 'shopify', 'delivery', 'simulate']);
 const CURRENCIES = new Set(['usd', 'eur', 'gbp', 'cad', 'aud']);
 
 function parsePositiveInteger(value, fallback, max) {
@@ -24,12 +30,8 @@ function isValidEmail(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
-function isValidPhone(value) {
-  return typeof value === 'string' && /^\+[1-9]\d{7,14}$/.test(value);
-}
-
 async function getEvents(req, res) {
-  const { type, status } = req.query;
+  const { type, status, source } = req.query;
   const limit = parsePositiveInteger(req.query.limit, 50, 100);
   const page = parsePositiveInteger(req.query.page, 1, 10000);
 
@@ -41,9 +43,14 @@ async function getEvents(req, res) {
     return res.status(400).json({ error: 'Unsupported status' });
   }
 
+  if (source && !SOURCES.has(source)) {
+    return res.status(400).json({ error: 'Unsupported source' });
+  }
+
   const filter = {};
   if (type) filter.type = type;
   if (status) filter.status = status;
+  if (source) filter.source = source;
 
   const events = await Event.find(filter)
     .sort({ createdAt: -1 })
@@ -70,7 +77,6 @@ async function simulateEvent(req, res) {
     amount = 4999,
     currency = 'usd',
     customerEmail = 'demo@example.com',
-    customerPhone,
   } = req.body;
 
   if (!EVENT_TYPES.has(type)) {
@@ -89,47 +95,13 @@ async function simulateEvent(req, res) {
     return res.status(400).json({ error: 'customerEmail must be a valid email address' });
   }
 
-  if (customerPhone && !isValidPhone(customerPhone)) {
-    return res.status(400).json({ error: 'customerPhone must be in E.164 format, for example +12345678900' });
-  }
-
-  const event = await Event.create({
+  const updated = await processEvent({
     type,
     source: 'simulate',
     amount,
     currency,
     customerEmail,
-    customerPhone,
-    status: 'pending',
   });
-
-  const updates = { status: 'pending' };
-  const errors = [];
-
-  const phone = customerPhone || process.env.TEST_RECIPIENT_PHONE;
-  if (phone) {
-    try {
-      const amountFormatted = `$${(amount / 100).toFixed(2)}`;
-      await sendSMS(phone, `[Simulated] Payment received: ${amountFormatted}. Thank you, ${customerEmail}!`);
-      updates.smsSent = true;
-    } catch (err) {
-      console.error('Twilio error:', err.message);
-      errors.push(`Twilio: ${err.message}`);
-    }
-  }
-
-  try {
-    await postSlackAlert({ ...event.toObject(), status: 'processed' });
-    updates.slackAlerted = true;
-  } catch (err) {
-    console.error('Slack error:', err.message);
-    errors.push(`Slack: ${err.message}`);
-  }
-
-  updates.status = updates.slackAlerted ? 'processed' : 'failed';
-  if (errors.length) updates.errorMessage = errors.join('; ');
-
-  const updated = await Event.findByIdAndUpdate(event._id, updates, { new: true });
   res.status(201).json(updated);
 }
 

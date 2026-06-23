@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { fetchEvents, simulateEvent, deleteEvent } from '../services/api';
+import { fetchEvents, simulateDeliveryUpdate, simulateEvent, simulateInventoryAlert, deleteEvent } from '../services/api';
 
 export function useEvents(filters = {}) {
   return useQuery({
@@ -13,6 +13,22 @@ export function useSimulateEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: simulateEvent,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+  });
+}
+
+export function useSimulateInventoryAlert() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: simulateInventoryAlert,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
+  });
+}
+
+export function useSimulateDeliveryUpdate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: simulateDeliveryUpdate,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['events'] }),
   });
 }

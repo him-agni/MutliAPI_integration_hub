@@ -12,7 +12,9 @@ This guide walks you through getting SaaS Integration Hub running locally end-to
 | npm | 9+ | bundled with Node |
 | MongoDB Atlas account | free tier | https://cloud.mongodb.com |
 | Stripe account | test mode | https://dashboard.stripe.com |
-| Twilio trial account | free | https://www.twilio.com |
+| Shopify dev store | free for app development | https://shopify.dev |
+| HubSpot account | free CRM tier | https://www.hubspot.com |
+| Resend account | free tier | https://resend.com |
 | Slack workspace | free | https://slack.com |
 | ngrok | any | https://ngrok.com |
 
@@ -72,7 +74,7 @@ MONGODB_URI=mongodb+srv://myuser:mypassword@cluster0.xxxxx.mongodb.net/saas-hub
 2. Copy the **Secret key** (starts with `sk_test_`)
 3. Set `STRIPE_SECRET_KEY=sk_test_...`
 
-### Configure the webhook (requires ngrok running first — see Step 6)
+### Configure the webhook (requires ngrok running first — see Start the App)
 1. Start ngrok: `ngrok http 5000`
 2. Copy your public URL (e.g. `https://abc123.ngrok.io`)
 3. Go to [dashboard.stripe.com/test/webhooks](https://dashboard.stripe.com/test/webhooks)
@@ -84,23 +86,19 @@ MONGODB_URI=mongodb+srv://myuser:mypassword@cluster0.xxxxx.mongodb.net/saas-hub
 
 ---
 
-## 5. Twilio
+## 5. Resend
 
-1. Log in to [console.twilio.com](https://console.twilio.com)
-2. From the dashboard copy your **Account SID** and **Auth Token**
-3. Under **Phone Numbers → Manage → Active numbers**, copy your trial number
+1. Log in to [resend.com](https://resend.com)
+2. Create an API key
+3. For free-tier local testing, use Resend's test sender `onboarding@resend.dev`
 4. Set:
    ```
-   SMS_MODE=mock
-   TWILIO_ACCOUNT_SID=AC...
-   TWILIO_AUTH_TOKEN=...
-   TWILIO_PHONE_NUMBER=+1...
-   TEST_RECIPIENT_PHONE=+1<your-verified-number>
+   RESEND_API_KEY=re_...
+   RESEND_FROM_EMAIL=SaaS Integration Hub <onboarding@resend.dev>
+   TEST_RECIPIENT_EMAIL=your-email@example.com
    ```
 
-Keep `SMS_MODE=mock` if you only want console logging during demos. Set `SMS_MODE=live` to send real Twilio messages; live mode requires all Twilio values above.
-
-> **Note:** Twilio trial accounts can only send SMS to verified numbers. Verify yours at [console.twilio.com/verify](https://console.twilio.com/verify).
+For production-style sending, verify your own domain in Resend and change `RESEND_FROM_EMAIL` to an address on that domain.
 
 ---
 
@@ -115,7 +113,44 @@ Keep `SMS_MODE=mock` if you only want console logging during demos. Set `SMS_MOD
 
 ---
 
-## 7. Start the App
+## 7. Shopify Inventory Webhook
+
+For local demos, use `/inventory/simulate` from the Simulate page. For real Shopify webhook testing:
+
+1. Create a Shopify app connected to a dev store
+2. Subscribe an inventory-related webhook to `/webhooks/shopify/inventory`
+3. Copy the webhook signing secret
+4. Set:
+   ```
+   SHOPIFY_WEBHOOK_SECRET=shpss_...
+   INVENTORY_ALERT_THRESHOLD=5
+   INVENTORY_ALERT_EMAIL=ops@example.com
+   ```
+
+---
+
+## 8. HubSpot Contact Sync
+
+For reliable local demos, use mock mode:
+
+```env
+HUBSPOT_MODE=mock
+```
+
+Payment events will show `HubSpot Contact: Yes` and store a deterministic mock contact ID without calling HubSpot.
+
+For live CRM creation, create a HubSpot private app token with contact write permissions and set:
+
+```env
+HUBSPOT_MODE=live
+HUBSPOT_ACCESS_TOKEN=pat-...
+```
+
+If `HUBSPOT_MODE` is not `mock` and `HUBSPOT_ACCESS_TOKEN` is omitted, payment events still process normally and simply skip HubSpot.
+
+---
+
+## 9. Start the App
 
 **Terminal 1 — Backend:**
 ```bash
@@ -136,13 +171,13 @@ ngrok http 5000
 
 ---
 
-## 8. Test the Full Flow
+## 10. Test the Full Flow
 
 ### Option A: Use the Simulate page
 1. Open [http://localhost:3000/simulate](http://localhost:3000/simulate)
-2. Fill in the form and click **Fire Event**
+2. Choose Payment, Inventory, or Delivery and click the scenario button
 3. Watch it appear in the [dashboard](http://localhost:3000/dashboard)
-4. Check your phone for an SMS and your Slack channel for an alert
+4. Check your inbox for an email and your Slack channel for an alert
 
 ### Option B: Use Stripe CLI (real webhook)
 ```bash
@@ -161,7 +196,9 @@ Import `postman/SaaS-Integration-Hub.json` and fire the **Simulate Event** reque
 |---------|-------------|-----|
 | `MongoDB connection error` | Wrong URI or IP not whitelisted | Check Atlas network access |
 | `Webhook signature verification failed` | Wrong `STRIPE_WEBHOOK_SECRET` | Re-copy from Stripe dashboard |
-| SMS not sending | Unverified recipient number | Verify number in Twilio console |
+| Email not sending | Missing Resend API key or sender issue | Check `RESEND_API_KEY` and `RESEND_FROM_EMAIL` |
+| HubSpot skipped | Mock mode disabled and missing private app token | Set `HUBSPOT_MODE=mock` or provide `HUBSPOT_ACCESS_TOKEN` |
+| Shopify webhook rejected | Wrong signing secret | Re-copy `SHOPIFY_WEBHOOK_SECRET` |
 | Slack message not posting | Wrong webhook URL | Re-copy from Slack app settings |
 | `Cannot GET /events` | Server not running | Run `npm run dev:server` |
 | `Invalid or missing API key` | `ADMIN_API_KEY` and `VITE_ADMIN_API_KEY` do not match | Copy the same demo key into `server/.env` and `client/.env` |

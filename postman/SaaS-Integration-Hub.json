@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "SaaS Integration Hub",
-    "description": "API collection for the SaaS Integration Hub — Stripe webhooks, Twilio SMS, Slack alerts, and event log.",
+    "description": "API collection for the SaaS Integration Hub — Stripe webhooks, Resend email, Slack alerts, and event log.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -55,7 +55,37 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"amount\": 4999,\n  \"currency\": \"usd\",\n  \"customerEmail\": \"demo@example.com\",\n  \"customerPhone\": \"+1234567890\"\n}"
+              "raw": "{\n  \"type\": \"payment_intent.succeeded\",\n  \"amount\": 4999,\n  \"currency\": \"usd\",\n  \"customerEmail\": \"demo@example.com\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Simulate Inventory Alert",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/inventory/simulate",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productTitle\": \"Demo Hoodie\",\n  \"sku\": \"DEMO-HOODIE\",\n  \"inventoryQuantity\": 3\n}"
+            }
+          }
+        },
+        {
+          "name": "Simulate Delivery Update",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/delivery/simulate",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "x-api-key", "value": "{{adminApiKey}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trackingNumber\": \"MOCK123456789\",\n  \"carrier\": \"Mock Carrier\",\n  \"deliveryStatus\": \"transit\",\n  \"customerEmail\": \"demo@example.com\"\n}"
             }
           }
         },
@@ -73,17 +103,17 @@
       "name": "Notifications",
       "item": [
         {
-          "name": "Send SMS",
+          "name": "Send Email",
           "request": {
             "method": "POST",
-            "url": "{{baseUrl}}/notify/sms",
+            "url": "{{baseUrl}}/notify/email",
             "header": [
               { "key": "Content-Type", "value": "application/json" },
               { "key": "x-api-key", "value": "{{adminApiKey}}" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"to\": \"+1234567890\",\n  \"message\": \"Test SMS from SaaS Integration Hub\"\n}"
+              "raw": "{\n  \"to\": \"demo@example.com\",\n  \"subject\": \"Test email from SaaS Integration Hub\",\n  \"html\": \"<strong>Your payment was received.</strong>\"\n}"
             }
           }
         },

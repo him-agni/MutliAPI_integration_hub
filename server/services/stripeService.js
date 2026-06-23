@@ -16,7 +16,6 @@ function extractEventData(event) {
     amount: obj.amount ?? obj.amount_total ?? null,
     currency: obj.currency ?? null,
     customerEmail: obj.receipt_email ?? obj.customer_email ?? null,
-    customerPhone: obj.metadata?.phone ?? null,
     rawPayload: event,
   };
 }

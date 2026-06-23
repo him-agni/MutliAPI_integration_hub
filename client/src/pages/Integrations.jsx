@@ -20,11 +20,32 @@ export default function Integrations() {
       detail: 'POST /webhooks/stripe',
     },
     {
-      name: 'Twilio',
-      icon: '📱',
-      description: 'Sends SMS notifications to customers when payment events fire.',
+      name: 'Resend',
+      icon: '✉️',
+      description: 'Sends email notifications to customers when payment events fire.',
       status: serverStatus,
-      detail: 'POST /notify/sms',
+      detail: 'POST /notify/email',
+    },
+    {
+      name: 'Shopify',
+      icon: '🛍️',
+      description: 'Receives signed inventory webhooks and raises low-stock operational alerts.',
+      status: serverStatus,
+      detail: 'POST /webhooks/shopify/inventory',
+    },
+    {
+      name: 'HubSpot',
+      icon: '🤝',
+      description: 'Creates CRM contacts from payment events when a customer email is available.',
+      status: serverStatus,
+      detail: 'CRM Contacts API',
+    },
+    {
+      name: 'Delivery',
+      icon: '📦',
+      description: 'Tracks mock shipment milestones for free-tier-safe post-purchase demos.',
+      status: serverStatus,
+      detail: 'POST /delivery/simulate',
     },
     {
       name: 'Slack',
@@ -58,18 +79,16 @@ export default function Integrations() {
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
         <h2 className="font-semibold text-gray-200 mb-3">Data Flow</h2>
         <pre className="text-xs text-gray-400 leading-relaxed font-mono whitespace-pre-wrap">
-{`Stripe Payment Event
+{`Commerce event
        ↓
-POST /webhooks/stripe  (signature validated)
+Stripe / Shopify / Delivery
        ↓
 Event saved to MongoDB
        ↓
-    ┌──────────────────┐
-    ↓                  ↓
-Twilio SMS          Slack Alert
-(to customer)       (to team channel)
-    ↓                  ↓
-    └──── Status updated in Event Log`}
+  ┌────────────┬────────────┬────────────┐
+  ↓            ↓            ↓            ↓
+Resend      Slack       HubSpot      Dashboard
+Email       Alert       Contact      Event Log`}
         </pre>
       </div>
     </div>

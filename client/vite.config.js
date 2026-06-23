@@ -9,6 +9,8 @@ export default defineConfig({
       '/events': 'http://localhost:5000',
       '/notify': 'http://localhost:5000',
       '/webhooks': 'http://localhost:5000',
+      '/delivery': 'http://localhost:5000',
+      '/inventory': 'http://localhost:5000',
       '/health': 'http://localhost:5000',
     },
   },

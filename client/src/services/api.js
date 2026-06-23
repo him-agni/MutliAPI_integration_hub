@@ -25,6 +25,20 @@ export const simulateEvent = async (payload) => {
   return data;
 };
 
+export const simulateInventoryAlert = async (payload) => {
+  const { data } = await axios.post(`${apiBaseUrl}/inventory/simulate`, payload, {
+    headers: adminApiKey ? { 'x-api-key': adminApiKey } : {},
+  });
+  return data;
+};
+
+export const simulateDeliveryUpdate = async (payload) => {
+  const { data } = await axios.post(`${apiBaseUrl}/delivery/simulate`, payload, {
+    headers: adminApiKey ? { 'x-api-key': adminApiKey } : {},
+  });
+  return data;
+};
+
 export const deleteEvent = async (id) => {
   const { data } = await api.delete(`/${id}`);
   return data;

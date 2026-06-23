@@ -8,15 +8,23 @@ const EVENT_TYPES = [
   'charge.succeeded',
   'charge.failed',
   'checkout.session.completed',
+  'shopify.inventory.low_stock',
+  'delivery.pre_transit',
+  'delivery.transit',
+  'delivery.out_for_delivery',
+  'delivery.delivered',
+  'delivery.failure',
 ];
 
 export default function Dashboard() {
   const [typeFilter, setTypeFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
 
   const { data, isLoading, isError, dataUpdatedAt } = useEvents({
     type: typeFilter || undefined,
     status: statusFilter || undefined,
+    source: sourceFilter || undefined,
   });
 
   return (
@@ -35,6 +43,18 @@ export default function Dashboard() {
       </div>
 
       <div className="flex gap-3">
+        <select
+          value={sourceFilter}
+          onChange={(e) => setSourceFilter(e.target.value)}
+          className="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-brand-500"
+        >
+          <option value="">All sources</option>
+          <option value="stripe">Stripe</option>
+          <option value="shopify">Shopify</option>
+          <option value="delivery">Delivery</option>
+          <option value="simulate">Simulate</option>
+        </select>
+
         <select
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
