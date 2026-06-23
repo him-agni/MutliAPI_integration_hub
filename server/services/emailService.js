@@ -79,7 +79,9 @@ async function sendEmail({ to, subject, html, text }) {
 }
 
 async function sendPaymentEmail(event) {
-  const to = event.customerEmail || process.env.TEST_RECIPIENT_EMAIL;
+  const to = event.source === 'simulate' && process.env.TEST_RECIPIENT_EMAIL
+    ? process.env.TEST_RECIPIENT_EMAIL
+    : event.customerEmail || process.env.TEST_RECIPIENT_EMAIL;
   if (!to) return null;
 
   const email = buildPaymentEmail(event);

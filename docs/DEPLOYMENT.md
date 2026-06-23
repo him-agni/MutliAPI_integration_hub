@@ -64,7 +64,8 @@ VITE_API_BASE_URL=https://YOUR_API_PROJECT.vercel.app
 VITE_ADMIN_API_KEY=same-value-as-server-ADMIN_API_KEY
 ```
 
-After frontend deployment, return to the API project's environment variables and set:
+After frontend deployment, return to the API project's environment variables and set the exact frontend origin.
+Do not include a path. A trailing slash is okay, but this is the cleanest format:
 
 ```env
 CLIENT_ORIGIN=https://YOUR_FRONTEND_PROJECT.vercel.app
@@ -83,6 +84,8 @@ Redeploy the API after changing `CLIENT_ORIGIN`.
 ## Production Notes
 
 - Use `HUBSPOT_MODE=mock` for a reliable portfolio demo.
+- For Resend free-tier demos, set `TEST_RECIPIENT_EMAIL` and `INVENTORY_ALERT_EMAIL` to an email address allowed by your Resend account.
+- Simulated payment events are routed to `TEST_RECIPIENT_EMAIL` so the demo does not try to email `demo@example.com`.
 - Keep `ADMIN_API_KEY` long and unguessable because the demo UI uses it for mutation endpoints.
 - Use Stripe test mode credentials only.
 - For real Stripe webhooks, point the Stripe webhook endpoint to:
