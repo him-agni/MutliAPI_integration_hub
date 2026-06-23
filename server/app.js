@@ -11,13 +11,20 @@ const inventoryRoutes = require('./routes/inventoryRoutes');
 const app = express();
 
 function normalizeOrigin(origin) {
-  return origin.replace(/\/+$/, '');
+  return origin.trim().replace(/^['"]|['"]$/g, '').replace(/\/+$/, '');
 }
 
 const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000')
   .split(',')
-  .map((origin) => normalizeOrigin(origin.trim()))
+  .map((origin) => normalizeOrigin(origin))
   .filter(Boolean);
+
+const vercelFrontendPattern = /^https:\/\/multi-api-integration-hub(?:-[a-z0-9-]+)?\.vercel\.app$/;
+
+function isAllowedOrigin(origin) {
+  const normalizedOrigin = normalizeOrigin(origin);
+  return allowedOrigins.includes(normalizedOrigin) || vercelFrontendPattern.test(normalizedOrigin);
+}
 
 const corsOptions = allowedOrigins.includes('*')
   ? { origin: true }
@@ -25,8 +32,7 @@ const corsOptions = allowedOrigins.includes('*')
       origin(origin, callback) {
         if (!origin) return callback(null, true);
 
-        const normalizedOrigin = normalizeOrigin(origin);
-        return callback(null, allowedOrigins.includes(normalizedOrigin));
+        return callback(null, isAllowedOrigin(origin));
       },
     };
 
@@ -34,6 +40,7 @@ const corsOptions = allowedOrigins.includes('*')
 app.use('/webhooks', express.raw({ type: 'application/json' }), webhookRoutes);
 
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 app.use('/notify', notificationRoutes);
