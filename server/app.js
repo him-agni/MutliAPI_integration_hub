@@ -15,10 +15,14 @@ const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:3000')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const corsOptions = allowedOrigins.includes('*')
+  ? { origin: true }
+  : { origin: allowedOrigins };
+
 // Stripe and Shopify webhooks require the raw body. Mount before JSON middleware.
 app.use('/webhooks', express.raw({ type: 'application/json' }), webhookRoutes);
 
-app.use(cors({ origin: allowedOrigins }));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use('/notify', notificationRoutes);
