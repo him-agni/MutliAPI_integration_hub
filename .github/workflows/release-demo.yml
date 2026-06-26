@@ -1,0 +1,27 @@
+name: Release Demo
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Simulate install
+        run: echo "Installing dependencies"
+
+      - name: Simulate tests
+        run: echo "Running tests"
+
+      - name: Simulate deploy
+        run: |
+          echo "Deploying release"
+          sleep 5
+          echo "Deployment complete"
