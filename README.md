@@ -5,6 +5,7 @@ A production-style commerce integration demo that connects **Stripe, Shopify, Re
 This project mirrors the kind of proof of concept a Solutions Engineer builds for a customer: one operational hub that receives commerce events, verifies webhooks, persists a normalized event history, and fans out downstream notifications.
 
 > **Live flow:** Payment, inventory, or delivery event -> normalized Express API -> MongoDB event log -> Slack, email, and optional CRM sync -> React dashboard.
+> Live link : https://multi-api-integration-hub-frontend.vercel.app
 
 ---
 
